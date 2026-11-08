@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rugby Referee Scorecard &amp; Match Companion</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="dark">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-group">
+      <div class="whistle-icon">&#128362;</div>
+      <div class="logo-text">
+        <h1>Rugby Referee Card</h1>
+        <span>Live Match Companion &bull; World Rugby Law Compliant</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <select id="themeSelect" class="btn btn-secondary btn-sm" style="padding: 6px 10px;">
+        <option value="dark">Dark Theme</option>
+        <option value="light">Light Theme</option>
+        <option value="high-contrast">Outdoor High Contrast</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" id="btnMatchSetup">
+        Match Setup &#9881;
+      </button>
+      <a href="print-pocket-cards.html" class="btn btn-primary btn-sm" target="_blank">
+        Print Pocket Cards &#128424;
+      </a>
+      <a href="print-match-sheet.html" class="btn btn-secondary btn-sm" target="_blank">
+        Full Report &#128221;
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- Active Sin Bin & Alert Banner (Shown dynamically when yellow card active) -->
+    <div class="sinbin-container" id="sinBinContainer">
+      <div class="sinbin-header">
+        <span>Active Sin-Bin / Disciplinary Timers</span>
+        <span style="font-size: 11px;">Tracked against live match clock</span>
+      </div>
+      <div class="sinbin-cards-list" id="sinBinCardsList"></div>
+    </div>
+
+    <!-- Match Clock & Scoreboard Hero -->
+    <section class="scoreboard-hero">
+      <!-- Period Selector / State -->
+      <div class="period-indicator-row">
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+          <span class="period-badge" id="periodBadge">1st Half</span>
+          <span class="match-code-tag" id="codeBadge">Rugby Union 15s</span>
+        </div>
+        <div class="btn-group" style="display: flex; gap: 4px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm period-btn" data-period="1st_half">1st Half</button>
+          <button class="btn btn-secondary btn-sm period-btn" data-period="half_time">Half Time</button>
+          <button class="btn btn-secondary btn-sm period-btn" data-period="2nd_half">2nd Half</button>
+          <button class="btn btn-secondary btn-sm period-btn" data-period="full_time">Full Time</button>
+        </div>
+      </div>
+
+      <!-- Clock Display -->
+      <div class="timer-container">
+        <div class="clock-digits" id="clockDigits">00:00</div>
+        <div class="clock-sub-info">
+          <span>Match Minute: <strong id="minuteBadge" style="color: var(--primary);">01'</strong></span>
+          <span>Stoppage: <strong id="stoppageTimeDisplay">+0:00</strong></span>
+        </div>
+        <div class="timer-controls">
+          <button class="btn btn-primary btn-lg" id="btnStartClock">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+            Start
+          </button>
+          <button class="btn btn-secondary" id="btnStoppage" title="Start/Pause Stoppage &amp; Injury Time">
+            + Injury Time
+          </button>
+          <button class="btn btn-secondary" id="btnResetClock" title="Reset Clock to Zero">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Scoreboard Display -->
+      <div class="score-board-grid">
+        <!-- Home Team -->
+        <div class="team-score-card home">
+          <div class="team-card-name" id="homeTeamLabel">Home XV</div>
+          <div class="team-card-color" id="homeColorLabel">Blue</div>
+          <div class="team-score-huge" id="homeScoreDisplay">0</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="homeBreakdownText">
+            0T &bull; 0C &bull; 0PG &bull; 0DG
+          </div>
+        </div>
+
+        <div class="score-divider">VS</div>
+
+        <!-- Away Team -->
+        <div class="team-score-card away">
+          <div class="team-card-name" id="awayTeamLabel">Away XV</div>
+          <div class="team-card-color" id="awayColorLabel">White</div>
+          <div class="team-score-huge" id="awayScoreDisplay">0</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="awayBreakdownText">
+            0T &bull; 0C &bull; 0PG &bull; 0DG
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scoring Action Panels (Home & Away Touch Racks) -->
+    <section class="scoring-actions-grid">
+      <!-- Home Action Panel -->
+      <div class="team-actions-panel" style="border-top: 4px solid var(--home-color);">
+        <div class="team-actions-header">
+          <span>Home Team Scoring</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Points</span>
+        </div>
+        <div class="score-buttons-rack">
+          <button class="btn-score-entry btn-score-try" onclick="recordScore('home', 'try')">
+            <span class="pts-label">Try (+5 pts)</span>
+            <span class="pts-val">+5</span>
+          </button>
+          <button class="btn-score-entry btn-score-penalty" onclick="recordScore('home', 'penalty')">
+            <span class="pts-label">Penalty (+3)</span>
+            <span class="pts-val">+3</span>
+          </button>
+          <button class="btn-score-entry btn-score-dg" onclick="recordScore('home', 'drop_goal')">
+            <span class="pts-label">Drop Goal (+3)</span>
+            <span class="pts-val">+3</span>
+          </button>
+          <button class="btn-score-entry btn-score-pt" onclick="recordScore('home', 'penalty_try')">
+            <span class="pts-label">Penalty Try (+7)</span>
+            <span class="pts-val">+7</span>
+          </button>
+          <button class="btn-score-entry" onclick="recordScore('home', 'conversion', 2)">
+            <span class="pts-label">Manual Conv (+2)</span>
+            <span class="pts-val">+2</span>
+          </button>
+        </div>
+        <div class="disciplinary-quick-row">
+          <button class="btn-yellow-card" onclick="openCardModal('home', 'yellow')">
+            🟨 Yellow Card (10m)
+          </button>
+          <button class="btn-red-card" onclick="openCardModal('home', 'red')">
+            🟥 Red Card
+          </button>
+        </div>
+      </div>
+
+      <!-- Away Action Panel -->
+      <div class="team-actions-panel" style="border-top: 4px solid var(--away-color);">
+        <div class="team-actions-header">
+          <span>Away Team Scoring</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Points</span>
+        </div>
+        <div class="score-buttons-rack">
+          <button class="btn-score-entry btn-score-try" onclick="recordScore('away', 'try')">
+            <span class="pts-label">Try (+5 pts)</span>
+            <span class="pts-val">+5</span>
+          </button>
+          <button class="btn-score-entry btn-score-penalty" onclick="recordScore('away', 'penalty')">
+            <span class="pts-label">Penalty (+3)</span>
+            <span class="pts-val">+3</span>
+          </button>
+          <button class="btn-score-entry btn-score-dg" onclick="recordScore('away', 'drop_goal')">
+            <span class="pts-label">Drop Goal (+3)</span>
+            <span class="pts-val">+3</span>
+          </button>
+          <button class="btn-score-entry btn-score-pt" onclick="recordScore('away', 'penalty_try')">
+            <span class="pts-label">Penalty Try (+7)</span>
+            <span class="pts-val">+7</span>
+          </button>
+          <button class="btn-score-entry" onclick="recordScore('away', 'conversion', 2)">
+            <span class="pts-label">Manual Conv (+2)</span>
+            <span class="pts-val">+2</span>
+          </button>
+        </div>
+        <div class="disciplinary-quick-row">
+          <button class="btn-yellow-card" onclick="openCardModal('away', 'yellow')">
+            🟨 Yellow Card (10m)
+          </button>
+          <button class="btn-red-card" onclick="openCardModal('away', 'red')">
+            🟥 Red Card
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline & Match Events Log -->
+    <section class="timeline-section">
+      <div class="section-head-bar">
+        <h3>Match Events &amp; Score Timeline</h3>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm" id="btnUndo">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
+            Undo Last
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btnCopyReport">
+            Copy WhatsApp Report &#128203;
+          </button>
+        </div>
+      </div>
+      <div class="events-list" id="eventsList"></div>
+    </section>
+
+  </main>
+
+  <!-- MODALS -->
+
+  <!-- Conversion Prompt Modal (Auto pops up when Try scored) -->
+  <div class="modal-overlay" id="conversionModal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 class="modal-title" style="border: none; margin-bottom: 6px;">TRY SCORED!</h3>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+        Conversion kick for <strong id="convTeamName" style="color: var(--text-main);"></strong>?
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button class="btn btn-success btn-lg" onclick="handleConversionDecision(true)">
+          CONVERSION SUCCESSFUL (+2)
+        </button>
+        <button class="btn btn-danger btn-lg" onclick="handleConversionDecision(false)">
+          MISSED / NO GOAL (0)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disciplinary Card Modal -->
+  <div class="modal-overlay" id="cardModal">
+    <div class="modal-content">
+      <div class="modal-title">Record Disciplinary Card</div>
+      <div class="form-group">
+        <label>Team</label>
+        <select id="cardTeamSelect" class="form-control">
+          <option value="home">Home Team</option>
+          <option value="away">Away Team</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Card Type</label>
+        <select id="cardTypeSelect" class="form-control">
+          <option value="yellow">Yellow Card (Sin Bin - 10 Mins / 2 Mins)</option>
+          <option value="red">Red Card (Permanent Send-Off)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Player Number (Jersey #)</label>
+        <input type="text" id="cardPlayerNum" class="form-control" placeholder="e.g. 7 or 12">
+      </div>
+      <div class="form-group">
+        <label>Infringement Reason (World Rugby Law 9)</label>
+        <select id="cardReason" class="form-control">
+          <option value="High Tackle (Head Contact)">High Tackle (Head contact)</option>
+          <option value="Dangerous Tackle / Tip Tackle">Dangerous Tackle / Tip Tackle</option>
+          <option value="Cynical Infringement (Red Zone)">Cynical Infringement (Red Zone)</option>
+          <option value="Repeated Team Infringements">Repeated Team Infringements</option>
+          <option value="Intentional Knock-On">Intentional Knock-On (Stopping Break)</option>
+          <option value="Dissent / Abuse of Match Official">Dissent / Abuse of Match Official</option>
+          <option value="Collapsing Scrum / Maul">Collapsing Scrum / Maul</option>
+          <option value="Striking / Fighting">Striking / Fighting</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+        <button class="btn btn-secondary modal-close-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmCard()">Issue Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Setup Modal -->
+  <div class="modal-overlay" id="setupModal">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-title">Match Configuration</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Home Team Name</label>
+          <input type="text" id="setupHomeName" class="form-control" value="Home XV">
+        </div>
+        <div class="form-group">
+          <label>Away Team Name</label>
+          <input type="text" id="setupAwayName" class="form-control" value="Away XV">
+        </div>
+        <div class="form-group">
+          <label>Home Jersey Color</label>
+          <input type="text" id="setupHomeColor" class="form-control" value="Blue">
+        </div>
+        <div class="form-group">
+          <label>Away Jersey Color</label>
+          <input type="text" id="setupAwayColor" class="form-control" value="White">
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Rugby Code</label>
+          <select id="setupCode" class="form-control">
+            <option value="union15">Rugby Union (15-a-side)</option>
+            <option value="union7">Rugby Sevens (7s)</option>
+            <option value="unionU19">Rugby Union U19 / U18</option>
+            <option value="league">Rugby League</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Half Duration (Minutes)</label>
+          <input type="number" id="setupDuration" class="form-control" value="40" min="5" max="45">
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Competition / Grade</label>
+          <input type="text" id="setupComp" class="form-control" placeholder="e.g. Senior Division 1">
+        </div>
+        <div class="form-group">
+          <label>Venue / Pitch #</label>
+          <input type="text" id="setupVenue" class="form-control" placeholder="e.g. Pitch 2, Memorial Ground">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Referee Name</label>
+        <input type="text" id="setupRef" class="form-control" placeholder="Your name">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+        <button class="btn btn-secondary modal-close-btn">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveSetup">Save Match Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
