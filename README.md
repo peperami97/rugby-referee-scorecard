@@ -2,6 +2,8 @@
 
 A comprehensive, World Rugby Law–compliant match scoring and reporting suite designed specifically for rugby union and league match officials.
 
+**Live App & Tools**: [https://peperami97.github.io/rugby-referee-scorecard/](https://peperami97.github.io/rugby-referee-scorecard/)
+
 Includes:
 1. **Printable Foldable Referee Pocket Scorecard** (`print-pocket-cards.html` & `pdfs/rugby_referee_pocket_card.pdf`): Sized to 86mm &times; 126mm (per panel), fitting perfectly into standard referee plastic wallets. Fold down the center crease for a double-sided, durable match card.
 2. **Interactive Live Match Companion Web App** (`index.html`): Real-time clock with stoppage tracker, touch-friendly score buttons, conversion prompts, active sin-bin countdowns with audio/visual alerts, and one-tap WhatsApp / portal report copying.
